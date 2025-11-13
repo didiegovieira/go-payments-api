@@ -9,6 +9,7 @@ package di
 import (
 	"github.com/google/wire"
 	"go-payments-api/internal/application"
+	"go-payments-api/internal/application/usecase"
 	"go-payments-api/internal/infrastructure/api"
 	"go-payments-api/internal/infrastructure/api/handler"
 	"go-payments-api/internal/test"
@@ -29,12 +30,25 @@ func InitializeApi() (*api.Application, func(), error) {
 	health := &handler.Health{
 		Presenter: presenter,
 	}
+	db, cleanup, err := ProvidePostgresConnection()
+	if err != nil {
+		return nil, nil, err
+	}
+	paymentRepository := ProvidePaymentRepository(db)
+	publisher := provideKafkaPublisher()
+	createPaymentImplementation := usecase.NewCreatePaymentUseCase(paymentRepository, publisher)
+	createPayment := &handler.CreatePayment{
+		UseCase:   createPaymentImplementation,
+		Presenter: presenter,
+	}
 	apiApplication := &api.Application{
-		BaseApp:       app,
-		Server:        server,
-		HealthHandler: health,
+		BaseApp:              app,
+		Server:               server,
+		HealthHandler:        health,
+		CreatePaymentHandler: createPayment,
 	}
 	return apiApplication, func() {
+		cleanup()
 	}, nil
 }
 
@@ -50,10 +64,22 @@ func InitilizeTests(mockCtrl *gomock.Controller) (*test.Application, func(), err
 	health := &handler.Health{
 		Presenter: presenter,
 	}
+	db, cleanup, err := ProvidePostgresConnection()
+	if err != nil {
+		return nil, nil, err
+	}
+	paymentRepository := ProvidePaymentRepository(db)
+	publisher := provideKafkaPublisher()
+	createPaymentImplementation := usecase.NewCreatePaymentUseCase(paymentRepository, publisher)
+	createPayment := &handler.CreatePayment{
+		UseCase:   createPaymentImplementation,
+		Presenter: presenter,
+	}
 	apiApplication := &api.Application{
-		BaseApp:       app,
-		Server:        server,
-		HealthHandler: health,
+		BaseApp:              app,
+		Server:               server,
+		HealthHandler:        health,
+		CreatePaymentHandler: createPayment,
 	}
 	testApplication := &test.Application{
 		BaseApp:  app,
@@ -61,6 +87,7 @@ func InitilizeTests(mockCtrl *gomock.Controller) (*test.Application, func(), err
 		MockCtrl: mockCtrl,
 	}
 	return testApplication, func() {
+		cleanup()
 	}, nil
 }
 
@@ -68,6 +95,9 @@ func InitilizeTests(mockCtrl *gomock.Controller) (*test.Application, func(), err
 
 var wireApiSet = wire.NewSet(
 	commonSet,
+	repositoriesSet,
+	messagingSet,
+	usecasesSet,
 
 	apiMiddlewaresSet,
 	apiHandlersSet, wire.Struct(new(api.Application), "*"),
@@ -75,6 +105,9 @@ var wireApiSet = wire.NewSet(
 
 var wireTestSet = wire.NewSet(
 	commonSet,
+	repositoriesSet,
+	messagingSet,
+	usecasesSet,
 
 	apiMiddlewaresSet,
 	apiHandlersSet, wire.Struct(new(api.Application), "*"), wire.Struct(new(test.Application), "*"),

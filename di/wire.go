@@ -13,6 +13,9 @@ import (
 
 var wireApiSet = wire.NewSet(
 	commonSet,
+	repositoriesSet,
+	messagingSet,
+	usecasesSet,
 
 	apiMiddlewaresSet,
 	apiHandlersSet,
@@ -22,6 +25,9 @@ var wireApiSet = wire.NewSet(
 
 var wireTestSet = wire.NewSet(
 	commonSet,
+	repositoriesSet,
+	messagingSet,
+	usecasesSet,
 
 	apiMiddlewaresSet,
 	apiHandlersSet,

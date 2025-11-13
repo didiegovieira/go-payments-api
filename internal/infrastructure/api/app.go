@@ -20,6 +20,9 @@ type Application struct {
 
 	// Health
 	HealthHandler *handler.Health
+
+	// Payments
+	CreatePaymentHandler *handler.CreatePayment
 }
 
 func init() {

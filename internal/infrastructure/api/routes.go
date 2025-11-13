@@ -1,42 +1,45 @@
 package api
 
 import (
-	"fmt"
-	"go-payments-api/docs"
+    "fmt"
+    "go-payments-api/docs"
 
-	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+    "github.com/gin-gonic/gin"
+    swaggerFiles "github.com/swaggo/files"
+    ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 const (
-	prefix = "v1/payments"
+    prefix = "v1/payments"
 )
 
 func (a *Application) SetupRoutes() {
-	router := a.Server.GetRouter()
+    router := a.Server.GetRouter()
 
-	// Swagger Docs
-	docs.SwaggerInfo.Title = "Go Payments API"
-	docs.SwaggerInfo.BasePath = prefix
+    // Swagger Docs
+    docs.SwaggerInfo.Title = "Go Payments API"
+    docs.SwaggerInfo.BasePath = prefix
 
-	// Redirect to swagger docs
-	router.GET("/docs/payments", func(c *gin.Context) {
-		c.Redirect(301, "/swagger/index.html")
-	})
+    // Redirect to swagger docs
+    router.GET("/docs/payments", func(c *gin.Context) {
+        c.Redirect(301, "/swagger/index.html")
+    })
 
-	// Swagger Docs
-	router.GET("/docs/payments/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+    // Swagger Docs
+    router.GET("/docs/payments/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Base Routes
-	base := router.Group(prefix)
-	{
-		// Health Check
-		base.GET("/health", a.HealthHandler.Handle())
-	}
+    // Base Routes
+    base := router.Group(prefix)
+    {
+        // Health Check
+        base.GET("/health", a.HealthHandler.Handle())
+        
+        // Payments
+        base.POST("/payments", a.CreatePaymentHandler.Handle())
+    }
 
-	// Log Registered Routes for Debugging
-	for _, route := range router.Routes() {
-		fmt.Printf("Registered route: %s %s\n", route.Method, route.Path)
-	}
+    // Log Registered Routes for Debugging
+    for _, route := range router.Routes() {
+        fmt.Printf("Registered route: %s %s\n", route.Method, route.Path)
+    }
 }

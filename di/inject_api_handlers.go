@@ -15,6 +15,7 @@ var apiHandlersSet = wire.NewSet(
 	provideApiServer,
 	provideApiPresenter,
 	wire.Struct(new(handler.Health), "*"),
+	wire.Struct(new(handler.CreatePayment), "*"),
 )
 
 func provideApiServer() api.Server[*gin.Engine] {

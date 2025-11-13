@@ -10,6 +10,8 @@ type (
 	Specification struct {
 		Environment string `envconfig:"ENVIRONMENT" default:"dev"`
 		HttpServer  HttpServerSpecification
+		Database    DatabaseSpecification
+		Kafka       KafkaSpecification
 		Metrics     MetricsSpecification
 	}
 
@@ -17,6 +19,18 @@ type (
 		Port         string        `envconfig:"HTTP_SERVER_PORT" default:":8080"`
 		ReadTimeout  time.Duration `envconfig:"HTTP_SERVER_READ_TIMEOUT" default:"15s"`
 		WriteTimeout time.Duration `envconfig:"HTTP_SERVER_WRITE_TIMEOUT" default:"15s"`
+	}
+
+	DatabaseSpecification struct {
+		Host     string `envconfig:"DB_HOST" default:"localhost"`
+		Port     int    `envconfig:"DB_PORT" default:"5432"`
+		User     string `envconfig:"DB_USER" default:"payments_user"`
+		Password string `envconfig:"DB_PASSWORD" default:"payments_pass"`
+		Name     string `envconfig:"DB_NAME" default:"payments"`
+	}
+
+	KafkaSpecification struct {
+		Brokers []string `envconfig:"KAFKA_BROKERS" default:"kafka:9092"`
 	}
 
 	MetricsSpecification struct {
