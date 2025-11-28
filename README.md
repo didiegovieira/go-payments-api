@@ -198,7 +198,7 @@ OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 ### Criar um Pagamento
 
 ```bash
-curl -X POST http://localhost:8080/v1/payments/payments \
+curl -X POST http://localhost:8080/v1/payments/ \
   -H "Content-Type: application/json" \
   -d '{
     "amount": 150.75,
